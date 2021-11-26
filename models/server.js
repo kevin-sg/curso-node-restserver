@@ -19,7 +19,7 @@ class Server {
 		// CORS
 		this.app.use(cors());
 
-		// Lecturay parseo del body
+		// Lectura y parseo del body
 		this.app.use(express.json());
 
 		// Directorio Público
@@ -27,11 +27,16 @@ class Server {
 	}
 
 	routes() {
-		this.app.use(this.usuariosPath, require("../routes/usuarios"));
+		this.app.use(
+			this.usuariosPath,
+			require("../routes/usuarios")
+		);
 	}
 
 	listen() {
-		this.app.listen(this.port, () => console.log(`Server in PORT: ${this.port}`));
+		this.app.listen(this.port, () =>
+			console.log(`Server in PORT: ${this.port}`)
+		);
 	}
 }
 
