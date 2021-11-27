@@ -1,6 +1,7 @@
-require("dotenv").config({ path: ".env" });
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const { dbConection } = require("../database/config");
 
 class Server {
 	constructor() {
@@ -8,11 +9,19 @@ class Server {
 		this.port = process.env.PORT;
 		this.usuariosPath = "/api/usuarios";
 
-		// Middlewares -> son funciones que se ejecutan con el servidor
+		// Conectar a base de datos
+		this.conectarDB();
+
+		// Middlewares -> son funciones que se ejecutan antes de llamar
+		// a un controlador o sea seguir con al ejecucion de mis peticiones
 		this.middlewares();
 
 		// Rutas de app
 		this.routes();
+	}
+
+	async conectarDB() {
+		await dbConection();
 	}
 
 	middlewares() {
