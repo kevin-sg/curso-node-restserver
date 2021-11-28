@@ -1,10 +1,13 @@
 const { Router } = require("express");
 const { check } = require("express-validator");
-const Role = require("../models/role");
 
 const { validarCampos } = require("../middlewares/validar-campos");
+const {
+	esRoleValido,
+	emailExiste,
+	existeUsuarioId,
+} = require("../helpers/db-validators");
 
-const router = Router();
 const {
 	usuariosGet,
 	usuarioPut,
@@ -13,15 +16,25 @@ const {
 	usuarioDelete,
 } = require("../controllers/usuarios");
 
+const router = Router();
+
 // Rutas
 
 // File 9 - video 13
 
 // Como segundo argumento con los middlewares
-
 router.get("/", usuariosGet);
 
-router.put("/:id", usuarioPut);
+router.put(
+	"/:id",
+	[
+		check("id", "No es un ID válido").isMongoId(),
+		check("id").custom(existeUsuarioId),
+		check("rol").custom(esRoleValido),
+		validarCampos,
+	],
+	usuarioPut
+);
 
 router.post(
 	"/",
@@ -31,23 +44,23 @@ router.post(
 			"password",
 			"El password es obligatorio, debe ser mas de 6 letra"
 		).isLength({ min: 6 }),
-		check("correo", "El correo no es válido").isEmail(),
-		check("rol").custom(async (rol = "") => {
-			// Error personalizado
-			const existeRol = await Role.findOne({ rol });
-			if (!existeRol) {
-				throw new Error(`El rol ${rol} no está registrado en la DB`);
-			}
-		}),
+		check("correo").custom(emailExiste),
+		check("rol").custom(esRoleValido),
+		validarCampos,
 	],
-	validarCampos,
 	usuariosPost
 );
 
-// check("rol", "No es un rol válido").isIn(["ADMIN_ROLE", "USER_ROLE"]),
+router.delete(
+	"/:id",
+	[
+		check("id", "No es un ID válido").isMongoId(),
+		check("id").custom(existeUsuarioId),
+		validarCampos,
+	],
+	usuarioDelete
+);
 
 router.patch("/", usuarioPatch);
-
-router.delete("/", usuarioDelete);
 
 module.exports = router;
