@@ -46,7 +46,7 @@ router.post(
 		check("nombre", "El nombre es obligatorio").not().isEmpty(),
 		check(
 			"password",
-			"El password es obligatorio, debe ser mas de 6 letras"
+			"El password es obligatorio, debe ser más de 6 letras"
 		).isLength({ min: 6 }),
 		check("correo").custom(emailExiste),
 		check("rol").custom(esRoleValido),
