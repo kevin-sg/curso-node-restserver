@@ -61,9 +61,6 @@ const usuarioPatch = (req = request, res = response) => {
 const usuarioDelete = async (req = request, res = response) => {
 	const { id } = req.params;
 
-	// Fisicamente lo borramos -> se pierde la integridad referencial
-	// const usuario = await Usuario.findByIdAndDelete(id);
-
 	const usuario = await Usuario.findByIdAndUpdate(id, { estado: false });
 
 	res.json(usuario);
