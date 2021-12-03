@@ -46,15 +46,40 @@ const login = async (req = request, res = response) => {
 	}
 };
 
-const googleSignin = async (req, res = response) => {
+const googleSignin = async (req = request, res = response) => {
 	const { id_token } = req.body;
 
 	try {
-		const googleUser = await googleVerify(id_token);
+		const { nombre, correo, img } = await googleVerify(id_token);
 
-		console.log(googleUser);
+		let usuario = await Usuario.findOne({ correo });
 
-		res.json({ msg: "Todo ok! Google signin", id_token });
+		// si no existe, crear una cuenta con estas credenciales
+		if (!usuario) {
+			const data = {
+				nombre,
+				correo,
+				img,
+				password: "1234pruebaData",
+				google: true,
+			};
+
+			usuario = new Usuario(data);
+			await usuario.save();
+		}
+
+		if (!usuario.estado) {
+			return res.status(401).json({
+				msg: "Hable con el adminitrador, usuario bloqueado",
+			});
+		}
+
+		// Generar el Token
+		const token = await generarJWT(usuario.id);
+
+		res.json({ usuario, token });
+
+		res.json({ msg: "Todo ok! Google SignIn" });
 	} catch (e) {
 		res.status(400).json({ msg: "Token de Google no es válido" });
 	}

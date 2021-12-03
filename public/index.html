@@ -36,13 +36,13 @@
 				console.log("Image URL: " + profile.getImageUrl());
 				console.log("Email: " + profile.getEmail()); // This is null if the 'email' scope is not present.
 
-				var id_token = googleUser.getAuthResponse().id_token;
-				const data = { id_token };
+				const id_token = googleUser.getAuthResponse().id_token;
+				const token = { id_token };
 
 				fetch(url, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(data),
+					body: JSON.stringify(token),
 				})
 					.then((resp) => resp.json())
 					.then((data) => console.log("Nuestro server", data))
