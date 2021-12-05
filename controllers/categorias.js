@@ -86,11 +86,9 @@ const actualizarCategoria = async (req = request, res = response) => {
 
 		const payload = { nombre, estado };
 
-		const categoria = await Categoria.findByIdAndUpdate(id, payload, {
-			new: true,
-		});
+		const categoria = await Categoria.findByIdAndUpdate(id, payload);
 
-		res.json({ categoria });
+		res.json(categoria);
 	} catch (e) {
 		console.error(e);
 		res.status(401).json({ msg: "Error de peticion" });
@@ -101,13 +99,11 @@ const borrarCategoria = async (req = request, res = response) => {
 	try {
 		const { id } = req.params;
 
-		const payload = { estado: false };
-
-		const categoria = await Categoria.findByIdAndUpdate(id, payload, {
-			new: true,
+		const categoria = await Categoria.findByIdAndUpdate(id, {
+			estado: false,
 		});
 
-		res.json({ categoria });
+		res.json(categoria);
 	} catch (e) {
 		console.error(e);
 		res.status(401).json({ msg: "Error al borrar" });
