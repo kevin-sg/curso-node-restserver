@@ -5,7 +5,7 @@ const obtenerProducto = async (req = request, res = response) => {
 	try {
 		const { desde = 0, limite = 5 } = req.query;
 
-		const [total, Productos] = await Promise.all([
+		const [total, productos] = await Promise.all([
 			Producto.countDocuments({ estado: true }),
 			Producto.find({ estado: true })
 				.sort({ nombre: 1 })
@@ -15,7 +15,7 @@ const obtenerProducto = async (req = request, res = response) => {
 				.limit(Number(limite)),
 		]);
 
-		res.json({ total, Productos });
+		res.json({ total, productos });
 	} catch (e) {
 		console.error(e);
 		res.status(401).json({ msg: "Error de peticion" });
