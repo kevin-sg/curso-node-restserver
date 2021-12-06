@@ -7,12 +7,6 @@ const dbConection = async () => {
 			useNewUrlParser: true,
 			useUnifiedTopology: true,
 		});
-		// MongoParseError: options usecreateindex, usefindandmodify are not supported
-
-		// useCreateIndex: true,
-		// useFindAndModify: false,
-
-		console.log("Base de datos online");
 	} catch (e) {
 		console.error(e);
 		throw new Error("Error a la hora de iniciar la DB");
