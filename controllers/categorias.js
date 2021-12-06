@@ -3,20 +3,13 @@ const { Categoria } = require("../models");
 
 const obtenerCategoria = async (req = request, res = response) => {
 	try {
-		const { desde = 0, limite = 4 } = req.query;
-
-		const query = { estado: true };
-
-		const populate = {
-			path: "usuario",
-			select: "nombre correo rol",
-		};
+		const { desde = 0, limite = 5 } = req.query;
 
 		const [total, categorias] = await Promise.all([
-			Categoria.countDocuments(query),
-			Categoria.find(query)
+			Categoria.countDocuments({ estado: true }),
+			Categoria.find({ estado: true })
 				.sort({ nombre: 1 })
-				.populate(populate)
+				.populate("usuario", "nombre")
 				.skip(Number(desde))
 				.limit(Number(limite)),
 		]);
@@ -31,12 +24,15 @@ const obtenerCategoria = async (req = request, res = response) => {
 const obtenerCategoriaById = async (req = request, res = response) => {
 	try {
 		const { id } = req.params;
-		const populate = {
-			path: "usuario",
-			select: "nombre correo rol",
-		};
 
-		const categoria = await Categoria.findById(id).populate(populate);
+		const categoria = await Categoria.findById(id).populate(
+			"usuario",
+			"nombre"
+		);
+
+		if (!categoria.estado) {
+			return res.status(401).json({ msg: "La categoria esta bloqueada" });
+		}
 
 		res.json({ categoria });
 	} catch (e) {
@@ -74,19 +70,14 @@ const crearCategorias = async (req = request, res = response) => {
 const actualizarCategoria = async (req = request, res = response) => {
 	try {
 		const { id } = req.params;
-		const nombre = req.body.nombre.toUpperCase();
-		const { estado } = req.body;
+		const { estado, usuario, ...data } = req.body;
 
-		const existeCategoria = await Categoria.findById(id);
-		if (!existeCategoria) {
-			return res.status(400).json({
-				msg: "La categoria no existe",
-			});
-		}
+		data.nombre = data.nombre.toUpperCase();
+		data.usuario = req.usuario._id;
 
-		const payload = { nombre, estado };
-
-		const categoria = await Categoria.findByIdAndUpdate(id, payload);
+		const categoria = await Categoria.findByIdAndUpdate(id, data, {
+			new: true,
+		});
 
 		res.json(categoria);
 	} catch (e) {
@@ -102,8 +93,13 @@ const borrarCategoria = async (req = request, res = response) => {
 		const categoria = await Categoria.findByIdAndUpdate(id, {
 			estado: false,
 		});
+		if (!categoria.estado) {
+			return res.status(401).json({
+				msg: `La categoria ${categoria.nombre} esta bloqueada`,
+			});
+		}
 
-		res.json(categoria);
+		res.json({ msg: `Categoria ${categoria.nombre} bloqueda!` });
 	} catch (e) {
 		console.error(e);
 		res.status(401).json({ msg: "Error al borrar" });

@@ -18,17 +18,18 @@ const router = Router();
  * {{url}}/api/categorias
  */
 
-// Obtener todas las categorias - publico
 router.get("/", obtenerCategoria);
 
-// Obtener una categoria por ID - publico
 router.get(
 	"/:id",
-	[check("id").custom(existeCategoria), validarCampos],
+	[
+		check("id", "No es un ID válido").isMongoId(),
+		check("id").custom(existeCategoria),
+		validarCampos,
+	],
 	obtenerCategoriaById
 );
 
-// Crear categoria - privada - cualquier persona con un token válido
 router.post(
 	"/",
 	[
@@ -39,28 +40,26 @@ router.post(
 	crearCategorias
 );
 
-// Actualizar - privada - cualquier con token válido
 router.put(
 	"/:id",
 	[
 		validarJWT,
 		check("id", "No es un ID válido").isMongoId(),
 		check("nombre", "El nombre es obligatorio").not().isEmpty(),
-		check("estado", "El estado es obligatorio").not().isEmpty(),
+		check("id").custom(existeCategoria),
 		validarCampos,
-		check("rol").custom(esAdminRole),
 	],
 	actualizarCategoria
 );
 
-// Borrar una categoria - Admin
 router.delete(
 	"/:id",
 	[
 		validarJWT,
+		esAdminRole,
 		check("id", "No es un ID válido").isMongoId(),
+		check("id").custom(existeCategoria),
 		validarCampos,
-		check("rol").custom(esAdminRole),
 	],
 	borrarCategoria
 );
