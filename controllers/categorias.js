@@ -44,27 +44,32 @@ const obtenerCategoriaById = async (req = request, res = response) => {
 const crearCategorias = async (req = request, res = response) => {
 	const nombre = req.body.nombre.toUpperCase();
 
-	const categoriaDB = await Categoria.findOne({ nombre });
+	try {
+		const categoriaDB = await Categoria.findOne({ nombre });
 
-	// Si ecuentra la categoria
-	if (categoriaDB) {
-		return res.status(400).json({
-			msg: `La categoria ${categoriaDB}, ya existe`,
-		});
+		// Si ecuentra la categoria
+		if (categoriaDB) {
+			return res.status(400).json({
+				msg: `La categoria ${categoriaDB}, ya existe`,
+			});
+		}
+
+		// Generar la data -> nombre y ID de ref.
+		const data = {
+			nombre,
+			usuario: req.usuario._id,
+		};
+
+		const categoria = new Categoria(data);
+
+		// Guardar DB
+		await categoria.save();
+
+		res.status(201).json(categoria);
+	} catch (e) {
+		console.error(e);
+		res.status(401).json({ msg: "Error de peticion" });
 	}
-
-	// Generar la data -> nombre y ID de ref.
-	const data = {
-		nombre,
-		usuario: req.usuario._id,
-	};
-
-	const categoria = new Categoria(data);
-
-	// Guardar DB
-	await categoria.save();
-
-	res.status(201).json(categoria);
 };
 
 const actualizarCategoria = async (req = request, res = response) => {
@@ -93,11 +98,6 @@ const borrarCategoria = async (req = request, res = response) => {
 		const categoria = await Categoria.findByIdAndUpdate(id, {
 			estado: false,
 		});
-		if (!categoria.estado) {
-			return res.status(401).json({
-				msg: `La categoria ${categoria.nombre} esta bloqueada`,
-			});
-		}
 
 		res.json({ msg: `Categoria ${categoria.nombre} bloqueda!` });
 	} catch (e) {

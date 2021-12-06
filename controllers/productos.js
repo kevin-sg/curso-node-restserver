@@ -42,30 +42,35 @@ const obtenerProductoById = async (req = request, res = response) => {
 };
 
 const crearProductos = async (req = request, res = response) => {
-	const { estado, usuario, ...body } = req.body;
+	try {
+		const { estado, usuario, ...body } = req.body;
 
-	const productoDB = await Producto.findOne({ nombre: body.nombre });
+		const productoDB = await Producto.findOne({ nombre: body.nombre });
 
-	// Si ecuentra la Producto
-	if (productoDB) {
-		return res.status(400).json({
-			msg: `La Producto ${productoDB.nombre}, ya existe`,
-		});
+		// Si ecuentra la Producto
+		if (productoDB) {
+			return res.status(400).json({
+				msg: `La Producto ${productoDB.nombre}, ya existe`,
+			});
+		}
+
+		// Generar la data
+		const data = {
+			...body,
+			nombre: body.nombre.toUpperCase(),
+			usuario: req.usuario._id,
+		};
+
+		const producto = new Producto(data);
+
+		// Guardar DB
+		await producto.save();
+
+		res.status(201).json(producto);
+	} catch (e) {
+		console.error(e);
+		res.status(401).json({ msg: "Error de peticion" });
 	}
-
-	// Generar la data
-	const data = {
-		...body,
-		nombre: body.nombre.toUpperCase(),
-		usuario: req.usuario._id,
-	};
-
-	const producto = new Producto(data);
-
-	// Guardar DB
-	await producto.save();
-
-	res.status(201).json(producto);
 };
 
 const actualizarProducto = async (req = request, res = response) => {
