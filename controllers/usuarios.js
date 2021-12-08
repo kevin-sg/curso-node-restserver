@@ -27,7 +27,7 @@ const usuariosPost = async (req = request, res = response) => {
 
 	// genSaltSync -> numero de vueltas, a mayor numero sera mas lento
 	const salt = bcryptjs.genSaltSync(10);
-	usuario.password = bcryptjs.hashSync(password, salt); //hashSync -> para encriptar
+	usuario.password = bcryptjs.hashSync(password, salt); // hashSync -> para encriptar
 
 	// guardar en MongoDB
 	await usuario.save();
@@ -39,7 +39,7 @@ const usuarioPut = async (req = request, res = response) => {
 	const { id } = req.params;
 	const { _id, password, google, correo, ...resto } = req.body;
 
-	// TODO validar cotraseña de DB
+	// TODO: validar cotraseña de DB
 	if (password) {
 		// genSaltSync -> numero de vueltas, a mayor numero sera mas lento
 		const salt = bcryptjs.genSaltSync(10);
